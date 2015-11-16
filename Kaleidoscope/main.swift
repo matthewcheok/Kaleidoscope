@@ -8,5 +8,21 @@
 
 import Foundation
 
-print("Hello, World!")
+let source = multiline(
+    "def foo(x, y)",
+    "  x + y * 2 + (4 + 5) / 3",
+    "",
+    "foo(3, 4)"
+)
 
+let lexer = Lexer(input: source)
+let tokens = lexer.tokenize()
+print(tokens)
+
+let parser = Parser(tokens: tokens)
+do {
+    print(try parser.parse())
+}
+catch {
+    print(error)
+}

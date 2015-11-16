@@ -8,6 +8,11 @@
 
 /* Begin PBXBuildFile section */
 		9E2C8B5A1BF9A97A006E34AE /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E2C8B591BF9A97A006E34AE /* main.swift */; };
+		9E2C8B651BF9A995006E34AE /* String.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E2C8B601BF9A995006E34AE /* String.swift */; };
+		9E2C8B661BF9A995006E34AE /* Lexer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E2C8B611BF9A995006E34AE /* Lexer.swift */; };
+		9E2C8B671BF9A995006E34AE /* Regex.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E2C8B621BF9A995006E34AE /* Regex.swift */; };
+		9E2C8B681BF9A995006E34AE /* Nodes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E2C8B631BF9A995006E34AE /* Nodes.swift */; };
+		9E2C8B691BF9A995006E34AE /* Parser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E2C8B641BF9A995006E34AE /* Parser.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -25,6 +30,11 @@
 /* Begin PBXFileReference section */
 		9E2C8B561BF9A97A006E34AE /* Kaleidoscope */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = Kaleidoscope; sourceTree = BUILT_PRODUCTS_DIR; };
 		9E2C8B591BF9A97A006E34AE /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
+		9E2C8B601BF9A995006E34AE /* String.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = String.swift; sourceTree = "<group>"; };
+		9E2C8B611BF9A995006E34AE /* Lexer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Lexer.swift; sourceTree = "<group>"; };
+		9E2C8B621BF9A995006E34AE /* Regex.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Regex.swift; sourceTree = "<group>"; };
+		9E2C8B631BF9A995006E34AE /* Nodes.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Nodes.swift; sourceTree = "<group>"; };
+		9E2C8B641BF9A995006E34AE /* Parser.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Parser.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -58,6 +68,11 @@
 			isa = PBXGroup;
 			children = (
 				9E2C8B591BF9A97A006E34AE /* main.swift */,
+				9E2C8B601BF9A995006E34AE /* String.swift */,
+				9E2C8B611BF9A995006E34AE /* Lexer.swift */,
+				9E2C8B621BF9A995006E34AE /* Regex.swift */,
+				9E2C8B631BF9A995006E34AE /* Nodes.swift */,
+				9E2C8B641BF9A995006E34AE /* Parser.swift */,
 			);
 			path = Kaleidoscope;
 			sourceTree = "<group>";
@@ -119,6 +134,11 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				9E2C8B681BF9A995006E34AE /* Nodes.swift in Sources */,
+				9E2C8B651BF9A995006E34AE /* String.swift in Sources */,
+				9E2C8B691BF9A995006E34AE /* Parser.swift in Sources */,
+				9E2C8B671BF9A995006E34AE /* Regex.swift in Sources */,
+				9E2C8B661BF9A995006E34AE /* Lexer.swift in Sources */,
 				9E2C8B5A1BF9A97A006E34AE /* main.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
