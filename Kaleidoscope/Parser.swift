@@ -9,7 +9,9 @@
 import Foundation
 
 enum Errors: ErrorType {
-    case UnknownError
+    case UnexpectedToken
+    case UndefinedOperator(String)
+    
     case ExpectedCharacter(Character)
     case ExpectedExpression
     case ExpectedArgumentList
@@ -34,18 +36,21 @@ class Parser {
     
     func parseNumber() throws -> ExprNode {
         guard case let Token.Number(value) = popCurrentToken() else {
-            throw Errors.UnknownError
+            throw Errors.UnexpectedToken
         }
         return NumberNode(value: value)
     }
     
     func parseExpression() throws -> ExprNode {
-        let lhs = try parsePrimary()
-        return try parseBinaryOpRHS(0, lhs: lhs)
+        let node = try parsePrimary()
+        return try parseBinaryOp(node)
     }
     
     func parseParens() throws -> ExprNode {
-        popCurrentToken()
+        guard case Token.ParensOpen = popCurrentToken() else {
+            throw Errors.ExpectedCharacter("(")
+        }
+        
         let exp = try parseExpression()
 
         guard case Token.ParensClose = popCurrentToken() else {
@@ -57,7 +62,7 @@ class Parser {
     
     func parseIdentifier() throws -> ExprNode {
         guard case let Token.Identifier(name) = popCurrentToken() else {
-            throw Errors.UnknownError
+            throw Errors.UnexpectedToken
         }
 
         guard case Token.ParensOpen = peekCurrentToken() else {
@@ -107,7 +112,7 @@ class Parser {
         "/": 40
     ]
     
-    func getCurrentTokenPrecedence() -> Int {
+    func getCurrentTokenPrecedence() throws -> Int {
         guard index < tokens.count else {
             return -1
         }
@@ -117,28 +122,29 @@ class Parser {
         }
         
         guard let precedence = operatorPrecedence[op] else {
-            return -1
+            throw Errors.UndefinedOperator(op)
         }
 
         return precedence
     }
     
-    func parseBinaryOpRHS(exprPrecedence: Int, var lhs: ExprNode) throws -> ExprNode {
+    func parseBinaryOp(node: ExprNode, exprPrecedence: Int = 0) throws -> ExprNode {
+        var lhs = node
         while true {
-            let tokenPrecedence = getCurrentTokenPrecedence()
+            let tokenPrecedence = try getCurrentTokenPrecedence()
             if tokenPrecedence < exprPrecedence {
                 return lhs
             }
             
             guard case let Token.Other(op) = popCurrentToken() else {
-                throw Errors.UnknownError
+                throw Errors.UnexpectedToken
             }
             
             var rhs = try parsePrimary()
-            let nextPrecedence = getCurrentTokenPrecedence()
+            let nextPrecedence = try getCurrentTokenPrecedence()
             
             if tokenPrecedence < nextPrecedence {
-                rhs = try parseBinaryOpRHS(tokenPrecedence+1, lhs: rhs)
+                rhs = try parseBinaryOp(rhs, exprPrecedence: tokenPrecedence+1)
             }
             lhs = BinaryOpNode(op: op, lhs: lhs, rhs: rhs)
         }
