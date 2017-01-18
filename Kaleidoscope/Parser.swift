@@ -8,14 +8,14 @@
 
 import Foundation
 
-enum Errors: ErrorType {
-    case UnexpectedToken
-    case UndefinedOperator(String)
+enum Errors: Error {
+    case unexpectedToken
+    case undefinedOperator(String)
     
-    case ExpectedCharacter(Character)
-    case ExpectedExpression
-    case ExpectedArgumentList
-    case ExpectedFunctionName
+    case expectedCharacter(Character)
+    case expectedExpression
+    case expectedArgumentList
+    case expectedFunctionName
 }
 
 class Parser {
@@ -31,12 +31,13 @@ class Parser {
     }
     
     func popCurrentToken() -> Token {
-        return tokens[index++]
+        defer { index += 1 }
+        return tokens[index]
     }
     
     func parseNumber() throws -> ExprNode {
-        guard case let Token.Number(value) = popCurrentToken() else {
-            throw Errors.UnexpectedToken
+        guard case let Token.number(value) = popCurrentToken() else {
+            throw Errors.unexpectedToken
         }
         return NumberNode(value: value)
     }
@@ -47,43 +48,43 @@ class Parser {
     }
     
     func parseParens() throws -> ExprNode {
-        guard case Token.ParensOpen = popCurrentToken() else {
-            throw Errors.ExpectedCharacter("(")
+        guard case Token.parensOpen = popCurrentToken() else {
+            throw Errors.expectedCharacter("(")
         }
         
         let exp = try parseExpression()
 
-        guard case Token.ParensClose = popCurrentToken() else {
-            throw Errors.ExpectedCharacter(")")
+        guard case Token.parensClose = popCurrentToken() else {
+            throw Errors.expectedCharacter(")")
         }
     
         return exp
     }
     
     func parseIdentifier() throws -> ExprNode {
-        guard case let Token.Identifier(name) = popCurrentToken() else {
-            throw Errors.UnexpectedToken
+        guard case let Token.identifier(name) = popCurrentToken() else {
+            throw Errors.unexpectedToken
         }
 
-        guard case Token.ParensOpen = peekCurrentToken() else {
+        guard case Token.parensOpen = peekCurrentToken() else {
             return VariableNode(name: name)
         }
         popCurrentToken()
         
         var arguments = [ExprNode]()
-        if case Token.ParensClose = peekCurrentToken() {
+        if case Token.parensClose = peekCurrentToken() {
         }
         else {
             while true {
                 let argument = try parseExpression()
                 arguments.append(argument)
                 
-                if case Token.ParensClose = peekCurrentToken() {
+                if case Token.parensClose = peekCurrentToken() {
                     break
                 }
                 
-                guard case Token.Comma = popCurrentToken() else {
-                    throw Errors.ExpectedArgumentList
+                guard case Token.comma = popCurrentToken() else {
+                    throw Errors.expectedArgumentList
                 }
             }
         }
@@ -94,14 +95,14 @@ class Parser {
     
     func parsePrimary() throws -> ExprNode {
         switch (peekCurrentToken()) {
-        case .Identifier:
+        case .identifier:
             return try parseIdentifier()
-        case .Number:
+        case .number:
             return try parseNumber()
-        case .ParensOpen:
+        case .parensOpen:
             return try parseParens()
         default:
-            throw Errors.ExpectedExpression
+            throw Errors.expectedExpression
         }
     }
     
@@ -117,18 +118,18 @@ class Parser {
             return -1
         }
         
-        guard case let Token.Other(op) = peekCurrentToken() else {
+        guard case let Token.other(op) = peekCurrentToken() else {
             return -1
         }
         
         guard let precedence = operatorPrecedence[op] else {
-            throw Errors.UndefinedOperator(op)
+            throw Errors.undefinedOperator(op)
         }
 
         return precedence
     }
     
-    func parseBinaryOp(node: ExprNode, exprPrecedence: Int = 0) throws -> ExprNode {
+    func parseBinaryOp(_ node: ExprNode, exprPrecedence: Int = 0) throws -> ExprNode {
         var lhs = node
         while true {
             let tokenPrecedence = try getCurrentTokenPrecedence()
@@ -136,8 +137,8 @@ class Parser {
                 return lhs
             }
             
-            guard case let Token.Other(op) = popCurrentToken() else {
-                throw Errors.UnexpectedToken
+            guard case let Token.other(op) = popCurrentToken() else {
+                throw Errors.unexpectedToken
             }
             
             var rhs = try parsePrimary()
@@ -151,25 +152,25 @@ class Parser {
     }
     
     func parsePrototype() throws -> PrototypeNode {
-        guard case let Token.Identifier(name) = popCurrentToken() else {
-            throw Errors.ExpectedFunctionName
+        guard case let Token.identifier(name) = popCurrentToken() else {
+            throw Errors.expectedFunctionName
         }
         
-        guard case Token.ParensOpen = popCurrentToken() else {
-            throw Errors.ExpectedCharacter("(")
+        guard case Token.parensOpen = popCurrentToken() else {
+            throw Errors.expectedCharacter("(")
         }
         
         var argumentNames = [String]()
-        while case let Token.Identifier(name) = peekCurrentToken() {
+        while case let Token.identifier(name) = peekCurrentToken() {
             popCurrentToken()
             argumentNames.append(name)
             
-            if case Token.ParensClose = peekCurrentToken() {
+            if case Token.parensClose = peekCurrentToken() {
                 break
             }
             
-            guard case Token.Comma = popCurrentToken() else {
-                throw Errors.ExpectedArgumentList
+            guard case Token.comma = popCurrentToken() else {
+                throw Errors.expectedArgumentList
             }
         }
         
@@ -198,7 +199,7 @@ class Parser {
         var nodes = [Any]()
         while index < tokens.count {
             switch peekCurrentToken() {
-            case .Define:
+            case .define:
                 let node = try parseDefinition()
                 nodes.append(node)
             default:
