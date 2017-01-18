@@ -9,31 +9,31 @@
 import Foundation
 
 public enum Token {
-    case Define
-    case Identifier(String)
-    case Number(Float)
-    case ParensOpen
-    case ParensClose
-    case Comma
-    case Other(String)
+    case define
+    case identifier(String)
+    case number(Float)
+    case parensOpen
+    case parensClose
+    case comma
+    case other(String)
 }
 
 typealias TokenGenerator = (String) -> Token?
 let tokenList: [(String, TokenGenerator)] = [
     ("[ \t\n]", { _ in nil }),
-    ("[a-zA-Z][a-zA-Z0-9]*", { $0 == "def" ? .Define : .Identifier($0) }),
-    ("[0-9.]+", { (r: String) in .Number((r as NSString).floatValue) }),
-    ("\\(", { _ in .ParensOpen }),
-    ("\\)", { _ in .ParensClose }),
-    (",", { _ in .Comma }),
+    ("[a-zA-Z][a-zA-Z0-9]*", { $0 == "def" ? .define : .identifier($0) }),
+    ("[0-9.]+", { (r: String) in .number((r as NSString).floatValue) }),
+    ("\\(", { _ in .parensOpen }),
+    ("\\)", { _ in .parensClose }),
+    (",", { _ in .comma }),
 ]
 
-public class Lexer {
+open class Lexer {
     let input: String
     init(input: String) {
         self.input = input
     }
-    public func tokenize() -> [Token] {
+    open func tokenize() -> [Token] {
         var tokens = [Token]()
         var content = input
         
@@ -46,16 +46,16 @@ public class Lexer {
                         tokens.append(t)
                     }
 
-                    content = content.substringFromIndex(content.startIndex.advancedBy(m.characters.count))
+                    content = content.substring(from: content.characters.index(content.startIndex, offsetBy: m.characters.count))
                     matched = true
                     break
                 }
             }
 
             if !matched {
-                let index = content.startIndex.advancedBy(1)
-                tokens.append(.Other(content.substringToIndex(index)))
-                content = content.substringFromIndex(index)
+                let index = content.characters.index(content.startIndex, offsetBy: 1)
+                tokens.append(.other(content.substring(to: index)))
+                content = content.substring(from: index)
             }
         }
         return tokens
