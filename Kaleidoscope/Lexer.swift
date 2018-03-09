@@ -16,6 +16,8 @@ public enum Token {
     case ParensClose
     case Comma
     case Other(String)
+    
+    case BinaryOp(String)
 }
 
 typealias TokenGenerator = (String) -> Token?
@@ -26,6 +28,8 @@ let tokenList: [(String, TokenGenerator)] = [
     ("\\(", { _ in .ParensOpen }),
     ("\\)", { _ in .ParensClose }),
     (",", { _ in .Comma }),
+    
+    ("[+\\-*/]", { .BinaryOp($0) })
 ]
 
 public class Lexer {
@@ -37,27 +41,32 @@ public class Lexer {
         var tokens = [Token]()
         var content = input
         
-        while (content.characters.count > 0) {
+        while (content.count > 0) {
             var matched = false
             
             for (pattern, generator) in tokenList {
-                if let m = content.match(pattern) {
+                if let m = content.match(regex: pattern) {
                     if let t = generator(m) {
                         tokens.append(t)
                     }
-
-                    content = content.substringFromIndex(content.startIndex.advancedBy(m.characters.count))
+                    let index = content.index(content.startIndex, offsetBy: m.count) // content.startIndex.advanced(by: m.count)
+                    // 'substring(from:)' is deprecated: Please use String slicing subscript with a 'partial range from' operator.
+                    //                    content = content.substring(from: index )
+                    content = String(content[index...])
                     matched = true
                     break
                 }
             }
-
+            
             if !matched {
-                let index = content.startIndex.advancedBy(1)
-                tokens.append(.Other(content.substringToIndex(index)))
-                content = content.substringFromIndex(index)
+                //                let index = content.startIndex.advanced(by: 1)
+                let index = content.index(content.startIndex, offsetBy: 1)
+                let o = String(content[...index]).trimmingCharacters(in: CharacterSet.whitespaces) // content.substringToIndex(index)
+                tokens.append(.Other(o))
+                content =  String(content[index...]) //  content.substringFromIndex(index)
             }
         }
         return tokens
     }
 }
+

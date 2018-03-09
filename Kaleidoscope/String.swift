@@ -8,6 +8,6 @@
 
 import Foundation
 
-public func multiline(x: String...) -> String {
-    return x.joinWithSeparator("\n")
+public func multiline(_ x: String...) -> String {
+    return x.joined(separator: "\n")
 }

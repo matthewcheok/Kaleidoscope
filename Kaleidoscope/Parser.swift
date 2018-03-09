@@ -8,7 +8,7 @@
 
 import Foundation
 
-enum Errors: ErrorType {
+enum Errors: Error {
     case UnexpectedToken
     case UndefinedOperator(String)
     
@@ -31,7 +31,9 @@ class Parser {
     }
     
     func popCurrentToken() -> Token {
-        return tokens[index++]
+        let i = index
+        index += 1
+        return tokens[i]
     }
     
     func parseNumber() throws -> ExprNode {
@@ -52,11 +54,11 @@ class Parser {
         }
         
         let exp = try parseExpression()
-
+        
         guard case Token.ParensClose = popCurrentToken() else {
             throw Errors.ExpectedCharacter(")")
         }
-    
+        
         return exp
     }
     
@@ -64,11 +66,11 @@ class Parser {
         guard case let Token.Identifier(name) = popCurrentToken() else {
             throw Errors.UnexpectedToken
         }
-
+        
         guard case Token.ParensOpen = peekCurrentToken() else {
             return VariableNode(name: name)
         }
-        popCurrentToken()
+        _ = popCurrentToken()
         
         var arguments = [ExprNode]()
         if case Token.ParensClose = peekCurrentToken() {
@@ -88,18 +90,21 @@ class Parser {
             }
         }
         
-        popCurrentToken()
+        _ = popCurrentToken()
         return CallNode(callee: name, arguments: arguments)
     }
     
     func parsePrimary() throws -> ExprNode {
-        switch (peekCurrentToken()) {
+        let token = peekCurrentToken()
+        switch (token) {
         case .Identifier:
             return try parseIdentifier()
         case .Number:
             return try parseNumber()
         case .ParensOpen:
             return try parseParens()
+            //        case .BinaryOp(op) :
+            
         default:
             throw Errors.ExpectedExpression
         }
@@ -117,18 +122,22 @@ class Parser {
             return -1
         }
         
-        guard case let Token.Other(op) = peekCurrentToken() else {
+        //        guard case let Token.Other(op) = peekCurrentToken() else {
+        //            return -1
+        //        }
+        
+        guard case let Token.BinaryOp(op2) = peekCurrentToken() else {
             return -1
         }
         
-        guard let precedence = operatorPrecedence[op] else {
-            throw Errors.UndefinedOperator(op)
+        guard let precedence = operatorPrecedence[op2] else {
+            throw Errors.UndefinedOperator(op2)
         }
-
+        
         return precedence
     }
     
-    func parseBinaryOp(node: ExprNode, exprPrecedence: Int = 0) throws -> ExprNode {
+    func parseBinaryOp(_ node: ExprNode, exprPrecedence: Int = 0) throws -> ExprNode {
         var lhs = node
         while true {
             let tokenPrecedence = try getCurrentTokenPrecedence()
@@ -136,7 +145,7 @@ class Parser {
                 return lhs
             }
             
-            guard case let Token.Other(op) = popCurrentToken() else {
+            guard case let Token.BinaryOp(op) = popCurrentToken() else { // was Other(op)
                 throw Errors.UnexpectedToken
             }
             
@@ -161,7 +170,7 @@ class Parser {
         
         var argumentNames = [String]()
         while case let Token.Identifier(name) = peekCurrentToken() {
-            popCurrentToken()
+            _ = popCurrentToken()
             argumentNames.append(name)
             
             if case Token.ParensClose = peekCurrentToken() {
@@ -174,13 +183,13 @@ class Parser {
         }
         
         // remove ")"
-        popCurrentToken()
+        _ = popCurrentToken()
         
         return PrototypeNode(name: name, argumentNames: argumentNames)
     }
     
     func parseDefinition() throws -> FunctionNode {
-        popCurrentToken()
+        _ = popCurrentToken()
         let prototype = try parsePrototype()
         let body = try parseExpression()
         return FunctionNode(prototype: prototype, body: body)

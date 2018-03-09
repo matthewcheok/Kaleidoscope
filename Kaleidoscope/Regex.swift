@@ -19,9 +19,9 @@ public extension String {
             expressions[regex] = expression
         }
         
-        let range = expression.rangeOfFirstMatchInString(self, options: [], range: NSMakeRange(0, self.utf16.count))
+        let range = expression.rangeOfFirstMatch(in: self, options: [], range: NSMakeRange(0, self.count))
         if range.location != NSNotFound {
-            return (self as NSString).substringWithRange(range)
+            return (self as NSString).substring(with: range)
         }
         return nil
     }
